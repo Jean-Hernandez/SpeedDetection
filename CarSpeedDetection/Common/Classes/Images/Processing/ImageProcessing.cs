@@ -75,6 +75,7 @@ namespace CarSpeedDetection.Common.Classes.Images.Processing
                 Watch.Stopwatch.Start();
                 break;
             }
+            //hello
             return contour;
         }
     }
