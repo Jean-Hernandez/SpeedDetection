@@ -85,7 +85,7 @@
   <ItemGroup>
     <Compile Include="Common\Classes\Images\Processing\ImageProcessing.cs" />
     <Compile Include="Common\Classes\Motion\MovingObject.cs" />
-    <Compile Include="Common\Classes\MovingObjects\Car.cs" />
+    <Compile Include="Common\Classes\Motion\SpeedCalculation.cs" />
     <Compile Include="Common\Extensions\Extensions.cs" />
     <Compile Include="Common\Extensions\VideoDevice.cs" />
     <Compile Include="Common\Extensions\Watch.cs" />

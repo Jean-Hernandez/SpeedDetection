@@ -41,7 +41,7 @@ namespace CarSpeedDetection.Common.Classes.Images.Processing
             Mat kernel = CvInvoke.GetStructuringElement(ElementShape.Rectangle, new Size(3, 3), new Point(-1, -1));
             CvInvoke.Threshold(foregroundMask, foregroundMask, 200, 255, ThresholdType.Binary);
             CvInvoke.MorphologyEx(foregroundMask, foregroundMask, MorphOp.Open, 
-                kernel, new Point(-1, -1), 1, BorderType.Reflect, new MCvScalar(0));
+                kernel, new Point(-1, -1), 5, BorderType.Default, new MCvScalar(0));
 
             return foregroundMask;
         }
@@ -59,24 +59,28 @@ namespace CarSpeedDetection.Common.Classes.Images.Processing
             CvInvoke.FindContours(foregroundMask, contours, null, RetrType.External,
                 ChainApproxMethod.ChainApproxSimple);
         }
-        /// <summary>
-        /// Return 
-        /// </summary>
-        /// <param name="contours"></param>
-        /// <returns></returns>
-        public static Rectangle GetRectangleFromContours(VectorOfVectorOfPoint contours)
-        {
-            Rectangle contour = Rectangle.Empty;
-            for (int i = 0; i < contours.Size; i++)
-            {
-                contour = CvInvoke.BoundingRectangle(contours[i]);
 
-                if (contour.Width < 200) continue;
-                Watch.Stopwatch.Start();
+        /// <summary>
+        /// Draw object's contours and centroid
+        /// </summary>
+        /// <param name="frame">frame to draw geometry</param>
+        /// <param name="contours">object's countours</param>
+        /// <param name="centroid">centroid of moving object</param>
+        public static void DrawObjectGeometry(Mat frame, VectorOfVectorOfPoint contours, out Point centroid)
+        {
+            centroid = new Point();
+            for (var i = 0; i < contours.Size; i++)
+            {
+                var boundingRectangle = CvInvoke.BoundingRectangle(contours[i]);
+
+                if (boundingRectangle.Width < 300)
+                    continue;
+
+                CvInvoke.Rectangle(frame, boundingRectangle, new MCvScalar(255, 0, 0), 4);
+                centroid = new Point(boundingRectangle.X + boundingRectangle.Width / 2, boundingRectangle.Y + boundingRectangle.Height / 2);
+                CvInvoke.Circle(frame, centroid, 3, new MCvScalar(255,  0, 0), 4);
                 break;
             }
-            //hello
-            return contour;
         }
     }
 }

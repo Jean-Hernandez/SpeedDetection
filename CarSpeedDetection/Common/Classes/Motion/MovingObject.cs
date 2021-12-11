@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace CarSpeedDetection.Common.Classes.Motion
 {
-    internal abstract class MovingObject
+    internal interface IMovingObject
     {
-        public abstract double GetPixelSize();
+        double GetPixelSize();
     }
 }

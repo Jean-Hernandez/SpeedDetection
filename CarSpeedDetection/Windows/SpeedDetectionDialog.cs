@@ -6,7 +6,6 @@ using System.Drawing.Imaging;
 using System.Windows.Forms;
 using CarSpeedDetection.Common.Classes.Images.Processing;
 using CarSpeedDetection.Common.Classes.Motion;
-using CarSpeedDetection.Common.Classes.MovingObjects;
 using CarSpeedDetection.Common.Extensions;
 using CarSpeedDetection.Properties;
 using DirectShowLib;
@@ -24,8 +23,6 @@ namespace CarSpeedDetection.Windows
             InitializeComponent();
             CenterToScreen();
         }
-
-        private List<Point> Centroids = new List<Point>();
 
         private void MenuItem_Browse_Click(object sender, EventArgs e)
         {
@@ -57,36 +54,27 @@ namespace CarSpeedDetection.Windows
 
         private void Process(object sender, EventArgs e)
         {
-            if (ImageProcessing.Capture == null)
+            Watch.Stopwatch.Start();
+            if (ImageProcessing.Capture == null || ImageProcessing.BackgroundSubtractor == null)
                 return;
 
             Mat frame = ImageProcessing.Capture.QueryFrame();
 
             if (frame == null)
-            {
-                var car = new Car();
-                Watch.Stopwatch.Stop();
-                var timeElapsed = Watch.Stopwatch.Elapsed.TotalSeconds;
-                var carSpeed = car.CalculateSpeed(Centroids, timeElapsed);
-                
-                label_Speed.Text = carSpeed + Resources.Car_CalculateSpeed_mph;
                 return;
-            }
 
             Mat foregroundMask = ImageProcessing.GetForegroundMask(frame);
 
             ImageProcessing.GetContoursFromMask(foregroundMask, out VectorOfVectorOfPoint contours);
 
-            var rectangle = ImageProcessing.GetRectangleFromContours(contours);
+            ImageProcessing.DrawObjectGeometry(frame, contours, out Point centroid);
 
-            if (!rectangle.IsEmpty && rectangle.Width > 250)
-            {
-                var centroid = new Point((rectangle.Height / 2), (rectangle.Width / 2));
-                 Centroids.Add(centroid);
-            }
-                 
-             
-            CvInvoke.Rectangle(frame, rectangle, new MCvScalar(255, 0, 0));
+            if(!centroid.IsEmpty)
+                SpeedCalculation.Centroids.Add(centroid);
+
+            SpeedCalculation calculator = new SpeedCalculation();
+            label_Speed.Text = calculator.CalculateSpeed(Watch.Stopwatch.Elapsed.TotalSeconds) + Resources.Car_CalculateSpeed_mph;
+
             CvInvoke.Resize(frame, frame, new Size(imageBox1.Width, imageBox1.Height));
 
             imageBox1.Image = frame;
